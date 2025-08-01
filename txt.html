@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小说查找</title>
+<!-- 预加载关键CSS资源 -->
+<link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.core.css" as="style">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" as="style">
+<!-- 预连接CDN域名 -->
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#07C160',
+          doc: {
+            gray: '#F5F5F5',
+            text: '#333333',
+            lightText: '#8C8C8C'
+          },
+          search: '#1677FF' // 蓝色
+        },
+      },
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer utilities {
+    .search-shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .highlight {
+      background-color: #FFF9C4;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+    .highlight-current {
+      background-color: #FFE082;
+      outline: 1px solid #FFC107;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+    .btn-transition {
+      transition: all 0.2s ease-in-out;
+    }
+    .search-container {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    .search-container.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .toggle-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 22px;
+      z-index: 50;
+    }
+    .adapt-text {
+      width: 100%;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      line-height: 1.6;
+      font-size: 0.8rem;
+      margin-bottom: 1rem; /* 增加段落间距 */
+    }
+    /* 新增：处理空行显示 */
+    .empty-line {
+      height: 1rem;
+      width: 100%;
+    }
+    /* 内容区域滚动样式 */
+    .content-scroll {
+      max-height: calc(100vh - 120px); /* 计算可用高度，减去上下边距 */
+      overflow-y: auto; /* 仅在内容区域显示滚动条 */
+      padding-right: 8px; /* 预留滚动条空间，避免内容抖动 */
+    }
+    /* 自定义滚动条样式 */
+    .content-scroll::-webkit-scrollbar {
+      width: 3px;
+    }
+    .content-scroll::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    .content-scroll::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    .content-scroll::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  }
+</style>
+<!-- 提前加载样式表 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.core.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css">
+</head>
+<!-- 壁纸背景 -->
+<body class="bg-gray-50 overflow-hidden" style="background-image: url('https://pb.nichi.co/enroll-engage-carbon'); background-repeat: no-repeat; background-attachment: fixed; background-size: 100vw;">
+  <!-- 搜索框容器 -->
+  <div id="searchContainer" class="search-container fixed top-0 left-0 right-0 z-50">
+    <div id="searchBox" class="w-[330px] mx-auto bg-white rounded-lg search-shadow p-4 mt-5">
+      <!-- 搜索输入区域 -->
+      <div class="flex items-center mb-3">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="输入查找的内容..." 
+          class="flex-1 outline-none text-xs text-doc-text"
+        >
+        <button id="clearBtn" class="text-doc-lightText p-1 hover:bg-doc-gray rounded ml-1 btn-transition text-xs">
+          清除
+        </button>
+      </div>
+      
+      <!-- 操作区域 -->
+      <div class="flex items-center justify-between text-xs">
+        <span id="resultCount" class="text-doc-lightText">0/0</span>
+        <div class="flex gap-2">
+          <button id="prevBtn" class="px-2 py-1 text-doc-text bg-doc-gray hover:bg-gray-200 rounded btn-transition disabled:opacity-50 disabled:cursor-not-allowed text-xs" disabled>
+            上一个
+          </button>
+          <button id="nextBtn" class="px-2 py-1 text-doc-text bg-doc-gray hover:bg-gray-200 rounded btn-transition disabled:opacity-50 disabled:cursor-not-allowed text-xs" disabled>
+            下一个
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 显示/隐藏搜索框按钮 -->
+  <button id="toggleSearchBtn" class="toggle-btn bg-search text-white px-2 py-3 rounded-full shadow-md btn-transition hover:bg-search/90 text-xs font-medium">
+    查找
+  </button>
+  
+  <!-- 页面内容区域 - 实现内部滚动 -->
+  <div class="max-w-4xl mx-auto pt-8 pb-10 px-4 md:px-8" id="contentContainer">
+    <div class="bg-white/80 p-6 md:p-10 rounded-lg shadow-sm" id="content">
+      <div class="ql-container ql-snow content-scroll"> <!-- 添加滚动容器 -->
+        <div class="ql-editor adapt-text" id="textContainer">
+          <!-- 文本内容将在这里加载 -->
+          <div class="loading-indicator text-center py-10 text-doc-lightText">加载中...</div>
+        </div>
+      </div>
+  </div>
+  </div>
+  
+  <script>
+    // 存储原始内容
+    let originalText = '';
+    let originalHtmlSegments = [];
+    let paragraphElements = [];
+    // 性能优化：记录上次搜索词，避免重复处理
+    let lastSearchTerm = '';
+    
+    // 链接跳转处理函数
+    function openLink(url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return false;
+    }
+    
+    // 预编译正则表达式
+    const linkRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // 加载文本内容 - 修复夸克浏览器兼容性
+    function loadTextContent() {
+      // 提前创建文档片段减少DOM重绘
+      const fragment = document.createDocumentFragment();
+      
+      // 使用兼容方式处理fetch
+      if (window.fetch) {
+        fetch('https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.1).txt')
+          .then(function(response) {
+            if (!response.ok) throw new Error('内容加载失败');
+            return response.text();
+          })
+          .then(function(text) {
+            processTextContent(text);
+          })
+          .catch(function(error) {
+            handleLoadError(error);
+          });
+      } else {
+        // 兼容不支持fetch的浏览器
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.1).txt', true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              processTextContent(xhr.responseText);
+            } else {
+              handleLoadError(new Error('内容加载失败'));
+            }
+          }
+        };
+        xhr.send();
+      }
+    }
+    
+    // 处理文本内容
+    function processTextContent(text) {
+      originalText = text;
+      const lines = originalText.split(/\r?\n/);
+      paragraphElements = [];
+      originalHtmlSegments = [];
+      
+      // 清空加载指示器
+      const loadingIndicator = document.querySelector('.loading-indicator');
+      if (loadingIndicator) {
+        loadingIndicator.remove();
+      }
+      
+      // 批量处理文本行，减少DOM操作次数
+      let batchSize = 50; // 每50行批量处理一次
+      let batchFragment = document.createDocumentFragment();
+      
+      lines.forEach(function(line, index) {
+        if (line.trim() === '') {
+          const emptyLine = document.createElement('div');
+          emptyLine.className = 'empty-line';
+          batchFragment.appendChild(emptyLine);
+          paragraphElements.push(emptyLine);
+          originalHtmlSegments.push('');
+        } else {
+          const pElement = document.createElement('p');
+          pElement.className = 'adapt-text';
+          const lineWithLinks = line.replace(linkRegex, '<a href="$1" onclick="return openLink(\'$1\')" class="text-blue-600 underline">$1</a>');
+          pElement.innerHTML = lineWithLinks;
+          batchFragment.appendChild(pElement);
+          paragraphElements.push(pElement);
+          originalHtmlSegments.push(lineWithLinks);
+        }
+        
+        // 批量插入DOM，减少重绘
+        if ((index + 1) % batchSize === 0) {
+          fragment.appendChild(batchFragment);
+          batchFragment = document.createDocumentFragment();
+        }
+      });
+      
+      // 插入剩余内容
+      if (batchFragment.hasChildNodes()) {
+        fragment.appendChild(batchFragment);
+      }
+      
+      document.getElementById('textContainer').appendChild(fragment);
+    }
+    
+    // 处理加载错误
+    function handleLoadError(error) {
+      const textContainer = document.getElementById('textContainer');
+      textContainer.innerHTML = `<div class="error-message text-center py-10 text-red-500">加载失败：${error.message}</div>`;
+    }
+    
+    // 切换搜索框显示/隐藏
+    function toggleSearch() {
+      const searchContainer = document.getElementById('searchContainer');
+      searchVisible = !searchVisible;
+      searchContainer.classList.toggle('active', searchVisible);
+      
+      // 修复夸克浏览器中搜索框显示时自动聚焦
+      if (searchVisible) {
+        setTimeout(function() {
+          document.getElementById('searchInput').focus();
+        }, 200);
+      }
+    }
+    
+    // 核心搜索功能
+    function handleSearch() {
+      // 清除之前的定时器
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      
+      // 缩短防抖时间至100ms，提升响应速度
+      searchTimeout = setTimeout(function() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput.value.trim();
+        
+        // 相同搜索词不重复处理
+        if (searchTerm === lastSearchTerm) return;
+        lastSearchTerm = searchTerm;
+        
+        if (!searchTerm) {
+          clearSearch();
+          return;
+        }
+        
+        // 清除之前的高亮
+        const marks = document.querySelectorAll('mark.highlight, mark.highlight-current');
+        marks.forEach(function(mark) {
+          const parent = mark.parentNode;
+          parent.replaceChild(document.createTextNode(mark.textContent), mark);
+          parent.normalize();
+        });
+        
+        searchResults = [];
+        currentIndex = -1;
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        
+        // 处理包含搜索词的段落
+        paragraphElements.forEach(function(element, index) {
+          if (element.className.includes('empty-line')) return;
+          
+          const originalHtml = originalHtmlSegments[index];
+          if (!originalHtml || !originalHtml.includes(searchTerm)) {
+            return;
+          }
+          
+          let highlightedHtml = originalHtml.replace(regex, '<mark class="highlight">$1</mark>');
+          element.innerHTML = highlightedHtml;
+          
+          // 收集结果
+          const newMarks = element.querySelectorAll('mark.highlight');
+          newMarks.forEach(function(mark) {
+            searchResults.push(mark);
+          });
+        });
+        
+        updateSearchState();
+        
+        // 定位第一个结果
+        if (searchResults.length > 0) {
+          goToResult(0);
+        }
+      }, 100);
+    }
+    
+    // 清除搜索
+    function clearSearch() {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      
+      // 清除标记
+      const marks = document.querySelectorAll('mark.highlight, mark.highlight-current');
+      marks.forEach(function(mark) {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      });
+      
+      searchResults = [];
+      currentIndex = -1;
+      document.getElementById('searchInput').value = '';
+      lastSearchTerm = '';
+      updateSearchState();
+    }
+    
+    // 更新搜索状态显示
+    function updateSearchState() {
+      const resultCount = document.getElementById('resultCount');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      resultCount.textContent = `${currentIndex + 1}/${searchResults.length}`;
+      prevBtn.disabled = searchResults.length === 0;
+      nextBtn.disabled = searchResults.length === 0;
+    }
+    
+    // 跳转到指定结果
+    function goToResult(index) {
+      if (index < 0 || index >= searchResults.length) return;
+      
+      // 更新样式
+      if (currentIndex !== -1 && currentIndex < searchResults.length) {
+        searchResults[currentIndex].className = 'highlight';
+      }
+      
+      currentIndex = index;
+      const target = searchResults[currentIndex];
+      target.className = 'highlight-current';
+      
+      // 滚动到目标位置
+      target.scrollIntoView({ behavior: 'instant', block: 'center' });
+      updateSearchState();
+    }
+    
+    // 上一个结果
+    function goToPrevResult() {
+      if (searchResults.length === 0) return;
+      const newIndex = currentIndex === 0 ? searchResults.length - 1 : currentIndex - 1;
+      goToResult(newIndex);
+    }
+    
+    // 下一个结果
+    function goToNextResult() {
+      if (searchResults.length === 0) return;
+      const newIndex = currentIndex === searchResults.length - 1 ? 0 : currentIndex + 1;
+      goToResult(newIndex);
+    }
+    
+    // 初始化变量
+    let searchResults = [];
+    let currentIndex = -1;
+    let searchTimeout = null;
+    let searchVisible = true;
+    
+    // 页面加载完成后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initEventListeners();
+        loadTextContent();
+      });
+    } else {
+      initEventListeners();
+      loadTextContent();
+    }
+    
+    // 初始化事件监听器
+    function initEventListeners() {
+      // 获取DOM元素
+      const searchInput = document.getElementById('searchInput');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const toggleSearchBtn = document.getElementById('toggleSearchBtn');
+      
+      // 绑定事件处理函数
+      searchInput.addEventListener('input', handleSearch);
+      prevBtn.addEventListener('click', goToPrevResult);
+      nextBtn.addEventListener('click', goToNextResult);
+      clearBtn.addEventListener('click', clearSearch);
+      toggleSearchBtn.addEventListener('click', toggleSearch);
+      
+      // 键盘导航
+      document.addEventListener('keydown', function(e) {
+        if (searchInput !== document.activeElement) return;
+      
+      if (e.key === 'Enter' && e.shiftKey) {
+        goToPrevResult();
+        e.preventDefault();
+      } else if (e.key === 'Enter') {
+        goToNextResult();
+        e.preventDefault();
+      }
+    });
+    
+    // 窗口大小变化处理（仅在必要时触发）
+    let resizeTimeout = null;
+    window.addEventListener('resize', () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (currentIndex >= 0 && searchResults.length > 0) {
+          goToResult(currentIndex);
+        }
+      }, 300); // 延长 resize 防抖时间，减少非必要操作
+    });
+    
+    // 初始化
+    toggleSearch();
+  </script>
+</body>
+</html>
