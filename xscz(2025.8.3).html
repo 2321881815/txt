@@ -318,14 +318,14 @@
     const currentCount = getClickCount();
     
     if (currentCount >= MAX_CLICKS_PER_DAY) {
-      alert(`你已经点击次数达到(${MAX_CLICKS_PER_DAY}次)了，小说看得过来吗？休息一下吧`);
+      alert(`今天你的点击次数已经(${MAX_CLICKS_PER_DAY}次)了，休息一下吧`);
       return false;
     }
     
     // 增加点击次数并检查是否达到上限
     const newCount = incrementClickCount();
     if (newCount === MAX_CLICKS_PER_DAY) {
-      alert(`这是您今日最后一次点击链接，已达每日上限(${MAX_CLICKS_PER_DAY}次)`);
+      alert(`今天已经压榨了(${MAX_CLICKS_PER_DAY}次，已经一滴也不剩了)`);
     }
     
     // 更新所有链接状态
