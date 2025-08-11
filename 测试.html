@@ -110,6 +110,19 @@
     max-width: 450px !important;
     margin: 5px; !important;
   }
+
+          /* 新增以下代码隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+    }
+
+      /* 针对 Chrome、Safari 等 WebKit 内核浏览器 */
+     .content-scroll::-webkit-scrollbar {
+       display: none; /* 完全隐藏滚动条 */
+    }
+    .content-scroll::-webkit-scrollbar {
+      width: 0px; /* 滚动条粗细 */
+    }
   }
   
   
@@ -228,6 +241,19 @@
     .forum-container::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge等浏览器隐藏滚动条 */
   }
+
+          /* 新增以下代码隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+    }
+
+      /* 针对 Chrome、Safari 等 WebKit 内核浏览器 */
+     .content-scroll::-webkit-scrollbar {
+       display: none; /* 完全隐藏滚动条 */
+    }
+    .content-scroll::-webkit-scrollbar {
+      width: 0px; /* 滚动条粗细 */
+    }
  }
  
  
@@ -339,6 +365,19 @@
     .forum-container::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge等浏览器隐藏滚动条 */
   }
+
+        /* 新增以下代码隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+    }
+
+      /* 针对 Chrome、Safari 等 WebKit 内核浏览器 */
+     .content-scroll::-webkit-scrollbar {
+       display: none; /* 完全隐藏滚动条 */
+    }
+    .content-scroll::-webkit-scrollbar {
+      width: 0px; /* 滚动条粗细 */
+    }
 }
  
  
@@ -451,6 +490,19 @@ display: flex;
     .forum-container::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge等浏览器隐藏滚动条 */
   }
+
+            /* 新增以下代码隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+    }
+
+      /* 针对 Chrome、Safari 等 WebKit 内核浏览器 */
+     .content-scroll::-webkit-scrollbar {
+       display: none; /* 完全隐藏滚动条 */
+    }
+    .content-scroll::-webkit-scrollbar {
+      width: 0px; /* 滚动条粗细 */
+    }
 }
 
  
@@ -479,18 +531,6 @@ display: flex;
   transition: background 0.2s; /* 平滑过渡动画 */
 }
 
-      /* 新增以下代码隐藏滚动条 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
-    }
-
-      /* 针对 Chrome、Safari 等 WebKit 内核浏览器 */
-     .content-scroll::-webkit-scrollbar {
-       display: none; /* 完全隐藏滚动条 */
-    }
-    .content-scroll::-webkit-scrollbar {
-      width: 0px; /* 滚动条粗细 */
-    }
   
 
 /* 在容器或全局样式中统一字体 */
