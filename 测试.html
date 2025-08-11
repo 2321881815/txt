@@ -477,6 +477,15 @@ display: flex;
   color: #e6d3d8; /* 容器内默认文字颜色为白色 */
   cursor: default; /* 鼠标在容器内显示默认样式（非手型） */
   transition: background 0.2s; /* 平滑过渡动画 */
+overflow-x: hidden !important; /* 保留横向隐藏（如需） */
+  overflow-y: hidden !important; /* 关闭纵向滚动 */
+  scrollbar-width: none !important; /* Firefox 隐藏滚动条 */
+  -ms-overflow-style: none !important; /* IE/Edge 隐藏滚动条 */
+}
+
+/* Chrome/Safari 隐藏滚动条 */
+.forum-container::-webkit-scrollbar {
+  display: none !important;
 }
 
 
