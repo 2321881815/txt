@@ -67,7 +67,7 @@
   preventLongPressMenu();
   
   // 链接点击次数限制相关变量
-  const MAX_CLICKS_PER_DAY = 50;
+  const MAX_CLICKS_PER_DAY = 10;
   const STORAGE_KEY = 'linkClickCount_';
   
   // 获取当前日期作为存储键的一部分
@@ -96,14 +96,14 @@
     const currentCount = getClickCount();
     
     if (currentCount >= MAX_CLICKS_PER_DAY) {
-      alert(`哒咩，都已经榨了(${MAX_CLICKS_PER_DAY}次)，再点就成榨汁姬了，让我休息一下吧`);
+      alert(`哒咩，今天下载的小说已经(${MAX_CLICKS_PER_DAY}本)了，不少啦，攒着慢慢看才更有滋味呢～不如先休息一下，剩下的明天再继续`);
       return false;
     }
     
     // 增加点击次数并检查是否达到上限
     const newCount = incrementClickCount();
     if (newCount === MAX_CLICKS_PER_DAY) {
-      alert(`今天已经被榨了(${MAX_CLICKS_PER_DAY}次)，真的一滴也没有了`);
+      alert(`今天已经下载(${MAX_CLICKS_PER_DAY}本)了，囤积太多看不过来的哦～`);
     }
     
     // 更新所有链接状态
