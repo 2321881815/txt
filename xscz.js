@@ -146,7 +146,7 @@
         new Promise((resolve) => {
           const link = document.createElement('link');
           link.rel = 'preload';
-          link.href = 'https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.1).txt';
+          link.href = 'https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.18).txt';
           link.as = 'fetch';
           link.crossOrigin = 'anonymous';
           link.onload = resolve;
