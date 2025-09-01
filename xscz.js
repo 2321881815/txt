@@ -146,7 +146,7 @@
         new Promise((resolve) => {
           const link = document.createElement('link');
           link.rel = 'preload';
-          link.href = 'https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.28).txt';
+          link.href = 'https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.9.2).txt';
           link.as = 'fetch';
           link.crossOrigin = 'anonymous';
           link.onload = resolve;
@@ -159,7 +159,7 @@
     // 先预加载资源，再加载文本内容
     preloadResources().then(() => {
       // 加载文本内容
-      fetch('https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.8.28).txt')
+      fetch('https://cdn.jsdelivr.net/gh/2321881815/music1@main/txt(2025.9.2).txt')
         .then(response => {
           if (!response.ok) throw new Error('内容加载失败');
           return response.text();
