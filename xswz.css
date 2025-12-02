@@ -36,7 +36,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background-image: url('https://pic1.imgdb.cn/item/692caeda291f309b79e97cdd.webp');
+    background-image: url('https://pic1.imgdb.cn/item/692ecb937e390957debbdd9a.webp');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
@@ -576,12 +576,12 @@ display: flex;
 
 /* 核心：鼠标移动到容器内部时，背景变暗 */
 .forum-container:hover, .novel-container:hover {
-  background: rgba(0, 0, 0, 0.3); /* 悬停时背景深色化（变暗） */
+  background: rgba(0, 0, 0, 0.4); /* 悬停时背景深色化（变暗） */
 }
 
 /* 核心：点击容器内部任意位置时，背景进一步变暗（增强反馈） */
 .forum-container:active, .novel-container:active {
-  background: rgba(0, 0, 0, 0.3); /* 点击时背景更深 */
+  background: rgba(0, 0, 0, 0.4); /* 点击时背景更深 */
   
 
 
