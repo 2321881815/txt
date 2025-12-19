@@ -187,7 +187,18 @@
       text-decoration: none;
     }
     
-    
+
+        /* 完全隐藏链接左下角URL预览 */
+ a {
+   pointer-events: none !important; /* 屏蔽默认指针事件（不影响自定义点击逻辑） */
+   cursor: pointer !important; /* 保持鼠标悬浮为手型，不破坏交互感知 */
+ }
+ /* 单独恢复链接点击事件（确保openLink函数正常触发） */
+ a[onclick^="return openLink"] {
+   pointer-events: auto !important;
+ }
+
+  
 /* 关键：论坛容器样式，模拟半透磨砂、圆角等 */
    #content {
   background: rgba(255, 255, 255, 0) !important; /* 初始半透背景（更浅） */
