@@ -4,10 +4,12 @@
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
     scrollbar-width: none; /* Firefox隐藏滚动条 */
     -ms-overflow-style: none; /* IE/Edge隐藏滚动条 */
   }
   /* Chrome/Safari等webkit内核浏览器隐藏滚动条 */
+  html::-webkit-scrollbar,
   body::-webkit-scrollbar {
     display: none;
   }
