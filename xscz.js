@@ -183,7 +183,7 @@
               const pElement = document.createElement('p');
               pElement.className = 'adapt-text';
               // 修改链接显示方式：隐藏URL，显示"点击跳转"文字
-              const lineWithLinks = line.replace(linkRegex, '<a href="$1" onclick="return openLink(\'$1\')" style="color: #FADEE0 !important; hover:color: #FADEE0 !important;" class="backdrop-blur-sm bg-white/10 px-2 py-0.5 rounded-md border border-blue-200/30 hover:bg-white/20 transition-all duration-200 inline-block">点击跳转</a>');
+              const lineWithLinks = line.replace(linkRegex, '<a onclick="return openLink(\'$1\')" style="color: #FADEE0 !important;" class="backdrop-blur-sm bg-white/10 px-2 py-0.5 rounded-md border border-blue-200/30 hover:bg-white/20 transition-all duration-200 inline-block">点击跳转</a>');
 
               pElement.innerHTML = lineWithLinks;
               allParagraphElements.push(pElement);
@@ -575,3 +575,20 @@ function toggleSearch() {
       }, 300);
     });
   });
+
+           // 禁止链接拖拽
+     document.addEventListener('dragstart', function(e) {
+       if (e.target.tagName === 'A') {
+         e.preventDefault();
+       }
+     });
+     // 点击链接手动触发跳转
+     document.addEventListener('click', function(e) {
+       const target = e.target;
+       if (target.tagName === 'A' && target.dataset.href) {
+         // 保留原生跳转行为
+         window.location.href = target.dataset.href;
+         // 如需新窗口打开，替换为 window.open(target.dataset.href)
+         e.preventDefault();
+       }
+     });
