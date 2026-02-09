@@ -517,54 +517,54 @@
     }, 500);
 
 
-           // 终极防调试：打开开发者工具即永久锁死空白页，返回/刷新均无法恢复
+           
 (function antiDevTools() {
-  // 1. 拦截所有调试快捷键（F12/Ctrl+Shift+I/C/U等）
+  
   document.addEventListener('keydown', e => {
     if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73,67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode === 85)) {
       e.preventDefault();e.stopPropagation();lockBlank();
     }
   }, true);
 
-  // 2. 禁用右键（除搜索框），右键直接锁空白
+  
   document.addEventListener('contextmenu', e => {
     if (!e.target.closest('#searchInput')) {
       e.preventDefault();e.stopPropagation();
     }
   }, true);
 
-  // 3. 核心：检测开发者工具打开 → 立即锁死空白页
+  
   function checkDev() {
-    // 检测调试器窗口/debugger触发，任一条件满足即锁死
+    
     const devOpen = window.outerWidth - window.innerWidth > 150 || window.outerHeight - window.innerHeight > 150;
     if (devOpen) lockBlank();
   }
 
-  // 4. 关键：永久锁死空白页的核心方法（销毁页面+替换所有历史+拦截所有操作）
+  
   function lockBlank() {
-    // 销毁原页面所有内容
+    
     document.body.innerHTML = '';
     document.head.innerHTML = '';
-    // 强制跳空白页并替换**所有**历史记录（返回会到浏览器最开始的页面，而非原页面）
+    
     window.location.href = 'about:blank';
     history.replaceState(null, null, 'about:blank');
     history.pushState(null, null, 'about:blank');
-    // 拦截所有历史记录操作（返回/前进）
+    
     window.addEventListener('popstate', () => history.replaceState(null, null, 'about:blank'), true);
     window.addEventListener('hashchange', () => window.location.href = 'about:blank', true);
-    // 拦截刷新（刷新仍为空白）
+    
     window.addEventListener('beforeunload', e => {
       e.preventDefault();
       window.location.href = 'about:blank';
     }, true);
   }
 
-  // 5. debugger死循环：强制触发调试检测，打开控制台即锁死
+  
   setInterval(() => {
     try {debugger;} catch (e) {lockBlank();}
   }, 50);
 
-  // 6. 实时检测窗口变化（调试器打开/关闭都会触发）
+  
   window.addEventListener('resize', checkDev, true);
   window.addEventListener('load', checkDev, true);
   window.addEventListener('DOMContentLoaded', checkDev, true);
